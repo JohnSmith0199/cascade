@@ -55,12 +55,12 @@ def index(request, campaign_id=None):
     trigger_state = __get_trigger(params, request.META['REMOTE_ADDR'])
 
     if campaign_id is None:
-        return redirect(request, settings.CAMPAIGN_A_PARAMS, settings.CAMPAIGN_A)
+        return redirect_target(request, settings.CAMPAIGN_A_PARAMS, settings.CAMPAIGN_A)
 
     try:
         campaign_url = CampaignMap.objects.get(inbound_url=campaign_id)
     except:
-        return redirect(request, settings.CAMPAIGN_A_PARAMS, settings.CAMPAIGN_A)
+        return redirect_target(request, settings.CAMPAIGN_A_PARAMS, settings.CAMPAIGN_A)
 
     if trigger_state and campaign_id is not None:
         record = CampaignData()
