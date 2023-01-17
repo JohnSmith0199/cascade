@@ -4,8 +4,9 @@ import json
 
 from django.shortcuts import redirect
 from django.conf import settings
+from django.utils.crypto import get_random_string
 
-from .models import URLParameter, TargetCriteria, CampaignData
+from .models import URLParameter, TargetCriteria, CampaignData, ValidationToken, CampaignMap
 
 
 logger = logging.getLogger(__name__)
@@ -40,21 +41,31 @@ def __get_trigger(request, ip_addr):
 
 
 def redirect_target(request, params, url):
-    if params:
-        return redirect(url + request.META['QUERY_STRING'])
+    token_id = get_random_string(16)
+    r = ValidationToken(token=token_id)
+    r.save()
+    if params and len(request.META['QUERY_STRING']) > 0:
+        return redirect(url + '?%s' % request.META['QUERY_STRING'] + '&token_id=%s' % token_id)
     else:
-        return redirect(url)
+        return redirect(url + '?token_id=%s' % token_id)
 
 
-def index(request):
+def index(request, campaign_id=None):
     params = request.GET
     trigger_state = __get_trigger(params, request.META['REMOTE_ADDR'])
 
-    if trigger_state:
-        ret_val = redirect_target(request, settings.CAMPAIGN_B_PARAMS, settings.CAMPAIGN_B)
+    if campaign_id is None:
+        return redirect(request, settings.CAMPAIGN_A_PARAMS, settings.CAMPAIGN_A)
+
+    try:
+        campaign_url = CampaignMap.objects.get(inbound_url=campaign_id)
+    except:
+        return redirect(request, settings.CAMPAIGN_A_PARAMS, settings.CAMPAIGN_A)
+
+    if trigger_state and campaign_id is not None:
         record = CampaignData()
         record.data = json.dumps(params)
         record.save()
+        return redirect_target(request, settings.CAMPAIGN_B_PARAMS, campaign_url.outbound_url)
     else:
-        ret_val = redirect_target(request, settings.CAMPAIGN_A_PARAMS, settings.CAMPAIGN_A)
-    return ret_val
+        return redirect_target(request, settings.CAMPAIGN_A_PARAMS, settings.CAMPAIGN_A)

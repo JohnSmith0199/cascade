@@ -3,7 +3,7 @@ import csv
 from django.contrib import admin
 from django.http import HttpResponse
 
-from .models import TargetCriteria, URLParameter, CampaignData
+from .models import TargetCriteria, URLParameter, CampaignData, CampaignMap
 
 
 def export_as_csv(self, request, queryset):
@@ -38,3 +38,8 @@ class URLParametersAdmin(admin.ModelAdmin):
 class CampaignDataAdmin(admin.ModelAdmin):
     list_display = [field.name for field in CampaignData._meta.get_fields()]
     action = [export_as_csv]
+
+
+@admin.register(CampaignMap)
+class CampaignMapAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in CampaignMap._meta.get_fields()]

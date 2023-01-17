@@ -20,6 +20,9 @@ CAMPAIGN_A_PARAMS = False
 CAMPAIGN_B = 'https://google.com/'
 CAMPAIGN_B_PARAMS = False
 
+EXPIRATION_TIME = 30
+TOKEN_CLEAN_TIME = 120
+
 
 # Application definition
 
@@ -30,6 +33,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken',
     'traffic_manager.apps.TrafficManagerConfig',
 ]
 
